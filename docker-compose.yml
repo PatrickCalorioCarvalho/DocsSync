@@ -1,0 +1,20 @@
+services:
+  assets:
+    container_name: docssync-assets
+    build:
+      context: ./assets
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+
+  documentation:
+    container_name: docssync-documentation
+    build:
+      context: ./documentation
+    ports:
+      - "3000:3000"
+    depends_on:
+      - assets
+    restart: unless-stopped

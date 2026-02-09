@@ -9,6 +9,10 @@ tests/
 .vscode/
 .idea/
 .DS_Store
+.git/
+.gitignore
 .env
 .env.*
+README.md
 data/
+Dockerfile
