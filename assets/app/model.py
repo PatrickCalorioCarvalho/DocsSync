@@ -11,7 +11,7 @@ def load_caption_model(model_name="Salesforce/blip-image-captioning-base"):
     print(f"Carregando modelo de caption: {model_name}")
     caption_model = BlipForConditionalGeneration.from_pretrained(model_name, cache_dir=MODEL_PATH)
     processor = BlipProcessor.from_pretrained(model_name, cache_dir=MODEL_PATH)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     caption_model.to(device)
     return caption_model, processor, device
 
