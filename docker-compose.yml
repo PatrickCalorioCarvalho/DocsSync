@@ -3,8 +3,8 @@ services:
     container_name: docssync-assets
     build:
       context: ./assets
-    ports:
-      - "8000:8000"
+    expose:
+      - "3001"
     volumes:
       - ./data:/app/data
     restart: unless-stopped
@@ -13,8 +13,20 @@ services:
     container_name: docssync-documentation
     build:
       context: ./documentation
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     depends_on:
       - assets
+    restart: unless-stopped
+
+  proxy:
+    container_name: docssync-proxy
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - assets
+      - documentation
     restart: unless-stopped

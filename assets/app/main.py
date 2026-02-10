@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from uuid import uuid4
@@ -35,8 +35,13 @@ async def startup_event():
         import sys
         sys.exit(1)
 
-@app.post("/assets/upload")
-async def upload_image(file: UploadFile = File(...)):
+@app.post("/api/assets/upload")
+async def upload_image(
+    request: Request,
+    file: UploadFile = File(...),
+    base_url: str = Form(None),
+    generate_ocr: bool = Form(True),
+):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Arquivo não é imagem")
 
@@ -44,22 +49,29 @@ async def upload_image(file: UploadFile = File(...)):
     image_bytes = await file.read()
     image_path = save_image(image_bytes, image_id)
 
-    ocr_text = describe_image_ptbr(
-        str(image_path),
-        caption_model, processor, device,
-        translation_model, translation_tokenizer
-    )
+    ocr_text = ""
+    if generate_ocr:
+        try:
+            ocr_text = describe_image_ptbr(
+                str(image_path),
+                caption_model, processor, device,
+                translation_model, translation_tokenizer
+            )
+        except Exception as e:
+            ocr_text = ""
 
-    image_url = f"http://localhost:8000/assets/images/{image_id}.png"
+    public_base = base_url or str(request.base_url).rstrip("/")
+    image_url = f"{public_base}/api/assets/images/{image_id}.png"
 
-    markdown = f"![{image_id}]({image_url})<!-- {ocr_text} -->"
+    markdown = f"![{image_id}]({image_url})"
+    if ocr_text:
+        markdown += f"<!-- {ocr_text} -->"
 
     return {
-        "url": image_url,
         "markdown": markdown
     }
 
-@app.get("/assets/images/{image_id}.png")
+@app.get("/api/assets/images/{image_id}.png")
 def get_image(image_id: str):
     path = get_image_path(image_id)
     if not path.exists():

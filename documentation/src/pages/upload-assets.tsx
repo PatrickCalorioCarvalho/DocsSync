@@ -11,6 +11,14 @@ export default function AssetsUpload() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [baseUrl, setBaseUrl] = useState<string>("");
+  const [generateOcr, setGenerateOcr] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin || "");
+    }
+  }, []);
 
   async function uploadImage(image: File) {
     setLoading(true);
@@ -19,9 +27,11 @@ export default function AssetsUpload() {
 
     const formData = new FormData();
     formData.append("file", image);
+    if (baseUrl) formData.append("base_url", baseUrl);
+    formData.append("generate_ocr", generateOcr ? "true" : "false");
 
     try {
-      const res = await fetch("http://localhost:8000/assets/upload", {
+      const res = await fetch("/api/assets/upload", {
         method: "POST",
         body: formData,
       });
@@ -72,6 +82,40 @@ export default function AssetsUpload() {
         <p className="subtitle">
             Selecione uma imagem ou cole com <strong>Ctrl + V</strong>
         </p>
+
+        {/* OCR selector moved above upload box */}
+        <div style={{display:'flex',justifyContent:'center',marginBottom:12}}>
+          <div style={{display:'inline-flex',border:'1px solid #d0d7de',borderRadius:24,overflow:'hidden'}} role="tablist" aria-label="OCR selector">
+            <button
+              type="button"
+              onClick={() => setGenerateOcr(true)}
+              aria-pressed={generateOcr}
+              style={{
+                padding: '8px 14px',
+                border: 'none',
+                background: generateOcr ? '#0b63ff' : 'transparent',
+                color: generateOcr ? '#fff' : '#111',
+                cursor: 'pointer'
+              }}
+            >
+              OCR: Ativado
+            </button>
+            <button
+              type="button"
+              onClick={() => setGenerateOcr(false)}
+              aria-pressed={!generateOcr}
+              style={{
+                padding: '8px 14px',
+                border: 'none',
+                background: !generateOcr ? '#0b63ff' : 'transparent',
+                color: !generateOcr ? '#fff' : '#111',
+                cursor: 'pointer'
+              }}
+            >
+              OCR: Desativado
+            </button>
+          </div>
+        </div>
 
         <label className="upload-box">
             <input
