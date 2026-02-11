@@ -20,14 +20,29 @@ const config: Config = {
     locales: ['pt-BR'],
   },
 
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: [
+    '@docusaurus/theme-mermaid',
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,
+        language: ['pt'],
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
         blog: {},
         theme: {
@@ -40,6 +55,9 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
+    mermaid: {
+      theme: { light: 'neutral', dark: 'dark' },
+    },
     colorMode: {
       respectPrefersColorScheme: true,
     },
